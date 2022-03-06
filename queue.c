@@ -18,9 +18,9 @@
 struct list_head *q_new()
 {
     struct list_head *q_head = malloc(sizeof(struct list_head));
-    if (!q_head) {
+    if (!q_head)
         return NULL;
-    }
+
     INIT_LIST_HEAD(q_head);
     return q_head;
 }
@@ -28,9 +28,9 @@ struct list_head *q_new()
 /* Free all storage used by queue */
 void q_free(struct list_head *l)
 {
-    if (!l) {
+    if (!l)
         return;
-    }
+
     struct list_head *node, *safe;
     list_for_each_safe (node, safe, l) {
         list_del_init(node);
@@ -86,7 +86,7 @@ bool q_insert_tail(struct list_head *head, char *s)
     if (!q_element) {
         return false;
     }
-    // assign value
+    /* assign value */
     size_t len = strlen(s);
     q_element->value = malloc(len + 1);
     if (!q_element->value) {
@@ -95,6 +95,7 @@ bool q_insert_tail(struct list_head *head, char *s)
     }
     memcpy(q_element->value, s, len);
     q_element->value[len] = '\0';
+
     /* initialize and add a new node */
     list_add_tail(&q_element->list, head);
     return true;
@@ -116,9 +117,9 @@ bool q_insert_tail(struct list_head *head, char *s)
  */
 element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
-    if (!head || head->next == head) {
+    if (!head || head->next == head)
         return NULL;
-    }
+
     element_t *ele = list_entry(head->next, element_t, list);
     if (sp) {
         size_t size = (strlen(ele->value) < bufsize - 1) ? strlen(ele->value)
@@ -136,9 +137,9 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
  */
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
-    if (!head || head->next == head) {
+    if (!head || head->next == head)
         return NULL;
-    }
+
     element_t *ele = list_entry(head->prev, element_t, list);
     if (sp) {
         size_t size = (strlen(ele->value) < bufsize - 1) ? strlen(ele->value)
@@ -197,9 +198,8 @@ struct list_head *find_mid(struct list_head *head)
 bool q_delete_mid(struct list_head *head)
 {
     // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
-    if (!head || head->next == head) {
+    if (!head || head->next == head)
         return false;
-    }
 
     struct list_head *mid = find_mid(head);
 
@@ -221,9 +221,9 @@ bool q_delete_mid(struct list_head *head)
 bool q_delete_dup(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
-    if (!head || head->next == head) {
+    if (!head || head->next == head)
         return false;
-    }
+
     struct list_head **new_list = &head->next;
     struct list_head *cur = head->next;
     while (cur != head && cur->next != head) {
@@ -252,6 +252,8 @@ bool q_delete_dup(struct list_head *head)
 void q_swap(struct list_head *head)
 {
     // https://leetcode.com/problems/swap-nodes-in-pairs/
+    if (!head || head->next == head)
+        return;
 
     struct list_head **node = &(head->next);
     struct list_head *cur, *temp;
@@ -281,6 +283,7 @@ void q_reverse(struct list_head *head)
 {
     if (!head || head->next == head)
         return;
+
     struct list_head *temp, *cur;
     cur = head->next;
     while (cur != head) {
@@ -296,22 +299,22 @@ void q_reverse(struct list_head *head)
 
 void merge_sort(struct list_head **head)
 {
-    if (!*head || !(*head)->next)
+    if (!(*head) || !(*head)->next)
         return;
-    struct list_head *l1, *l2, *temp;
+    struct list_head *l1, *l2;
 
-    for (l1 = l2 = *head; l2 && l2->next; l1 = l1->next, l2 = l2->next->next)
+    for (l1 = l2 = *head; l1 && l1->next; l2 = l2->next, l1 = l1->next->next)
         ;
-    l2 = l1->next;
-    l1->next = NULL;
+    l2->prev->next = NULL;
     l1 = *head;
 
     merge_sort(&l1);
     merge_sort(&l2);
 
-    struct list_head **new_head = &l1;
+    struct list_head *temp = NULL;
+    struct list_head *test_head = NULL;
+    struct list_head **new_head = &test_head;
     while (l1 && l2) {
-        temp = (*new_head)->prev;
         if (strcmp(list_entry(l1, element_t, list)->value,
                    list_entry(l2, element_t, list)->value) < 0) {
             *new_head = l1;
@@ -321,9 +324,30 @@ void merge_sort(struct list_head **head)
             l2 = l2->next;
         }
         (*new_head)->prev = temp;
+        temp = *new_head;
         new_head = &(*new_head)->next;
     }
     *new_head = l1 ? l1 : l2;
+    (*new_head)->prev = temp;
+    *head = test_head;
+    /*
+        struct list_head **new_head = head, *temp = (*head)->prev;
+        while (l1 && l2) {
+            if (strcmp(list_entry(l1, element_t, list)->value,
+                       list_entry(l2, element_t, list)->value) < 0) {
+                *new_head = l1;
+                l1 = l1->next;
+            } else {
+                *new_head = l2;
+                l2 = l2->next;
+            }
+            (*new_head)->prev = temp;
+        temp = *new_head;
+            new_head = &(*new_head)->next;
+        }
+        *new_head = l1 ? l1 : l2;
+        (*new_head)->prev = temp;
+    */
 }
 /*
  * Sort elements of queue in ascending order
@@ -336,6 +360,7 @@ void q_sort(struct list_head *head)
         return;
     head->prev->next = NULL;
     merge_sort(&head->next);
+    head->next->prev = head;
     struct list_head *cur = head->next;
     for (; cur->next; cur = cur->next)
         ;
