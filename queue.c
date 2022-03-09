@@ -310,28 +310,26 @@ void merge_sort(struct list_head **head)
 
     merge_sort(&l1);
     merge_sort(&l2);
-
     struct list_head *temp = NULL;
-    struct list_head *test_head = NULL;
-    struct list_head **new_head = &test_head;
     while (l1 && l2) {
         if (strcmp(list_entry(l1, element_t, list)->value,
                    list_entry(l2, element_t, list)->value) < 0) {
-            *new_head = l1;
+            *head = l1;
             l1 = l1->next;
         } else {
-            *new_head = l2;
+            *head = l2;
             l2 = l2->next;
         }
-        (*new_head)->prev = temp;
-        temp = *new_head;
-        new_head = &(*new_head)->next;
+        (*head)->prev = temp;
+        temp = *head;
+        head = &(*head)->next;
     }
-    *new_head = l1 ? l1 : l2;
-    (*new_head)->prev = temp;
-    *head = test_head;
+    *head = l1 ? l1 : l2;
+    (*head)->prev = temp;
     /*
-        struct list_head **new_head = head, *temp = (*head)->prev;
+        struct list_head *temp = NULL;
+        struct list_head *head = NULL;
+        struct list_head **new_head = &test_head;
         while (l1 && l2) {
             if (strcmp(list_entry(l1, element_t, list)->value,
                        list_entry(l2, element_t, list)->value) < 0) {
@@ -342,11 +340,12 @@ void merge_sort(struct list_head **head)
                 l2 = l2->next;
             }
             (*new_head)->prev = temp;
-        temp = *new_head;
+            temp = *new_head;
             new_head = &(*new_head)->next;
         }
         *new_head = l1 ? l1 : l2;
         (*new_head)->prev = temp;
+        *head = test_head;
     */
 }
 /*
