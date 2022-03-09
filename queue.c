@@ -226,15 +226,23 @@ bool q_delete_dup(struct list_head *head)
 
     struct list_head **new_list = &head->next;
     struct list_head *cur = head->next;
+    struct list_head *to_free = NULL;
+
     while (cur != head && cur->next != head) {
         if (!strcmp(list_entry(cur, element_t, list)->value,
                     list_entry(cur->next, element_t, list)->value)) {
-            char *str = list_entry(cur, element_t, list)->value;
-            cur = cur->next->next;
+            to_free = cur;
+            cur = cur->next;
             while (cur != head &&
-                   !strcmp(list_entry(cur, element_t, list)->value, str)) {
+                   !strcmp(list_entry(cur, element_t, list)->value,
+                           list_entry(cur->prev, element_t, list)->value)) {
+                list_del_init(to_free);
+                q_release_element(list_entry(to_free, element_t, list));
+                to_free = cur;
                 cur = cur->next;
             }
+            list_del_init(to_free);
+            q_release_element(list_entry(to_free, element_t, list));
         } else {
             *new_list = cur;
             cur = cur->next;
