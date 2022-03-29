@@ -278,6 +278,7 @@ void q_swap(struct list_head *head)
         (*node)->next = cur;
         cur->prev = *node;
         *node = temp;
+        node = &(*node)->next->next;
     }
 }
 
@@ -335,27 +336,6 @@ void merge_sort(struct list_head **head)
     }
     *head = l1 ? l1 : l2;
     (*head)->prev = temp;
-    /*
-        struct list_head *temp = NULL;
-        struct list_head *head = NULL;
-        struct list_head **new_head = &test_head;
-        while (l1 && l2) {
-            if (strcmp(list_entry(l1, element_t, list)->value,
-                       list_entry(l2, element_t, list)->value) < 0) {
-                *new_head = l1;
-                l1 = l1->next;
-            } else {
-                *new_head = l2;
-                l2 = l2->next;
-            }
-            (*new_head)->prev = temp;
-            temp = *new_head;
-            new_head = &(*new_head)->next;
-        }
-        *new_head = l1 ? l1 : l2;
-        (*new_head)->prev = temp;
-        *head = test_head;
-    */
 }
 /*
  * Sort elements of queue in ascending order
